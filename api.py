@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pathlib import Path
@@ -9,7 +10,7 @@ import re
 
 app = FastAPI()
 
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+app.mount("/static", StaticFiles(directory="static", html=True), name="static")
 
 # Настройка CORS
 app.add_middleware(
@@ -58,6 +59,13 @@ all_items = [i for i in os.walk(path2)][0][2]
 good_items = [i for i in all_items if get_item_price(i.split(".")[0], 2000)]
 app.mount("/items", StaticFiles(directory=path2), name="dota_items")
 
+
+
+
+@app.get("/")
+async def serve_index():
+    return FileResponse("static/index.html")
+
 @app.get("/get_hero")
 async def get_random_hero():
     get_random = random.choice(all_heroes)
@@ -84,5 +92,4 @@ async def get_random_hero_with_build():
     }
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8000))  # Используем PORT из окружения Render
-    uvicorn.run("api:app", host="0.0.0.0", port=port, reload=False)  # reload=False для продакшена
+    uvicorn.run("api:app", reload=True)
