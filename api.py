@@ -9,6 +9,8 @@ import re
 
 app = FastAPI()
 
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
+
 # Настройка CORS
 app.add_middleware(
     CORSMiddleware,
@@ -76,7 +78,8 @@ async def get_random_hero_with_build():
         "url" : "/img/"+get_random_hero,
         "build": [
             {"item_title": i.split(".")[0],
-             "item_url": "/items/"+ i}
+             "item_url": "/items/"+ i,
+             "price": get_item_price(i.split(".")[0])}
             for i in get_random_build]
     }
 
