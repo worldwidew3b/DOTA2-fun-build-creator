@@ -12,8 +12,7 @@ app = FastAPI()
 # Настройка CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5500", "http://127.0.0.1:5500",
-                   "http://localhost:8000", "http://127.0.0.1:8000"],  # Разрешённые домены
+    allow_origins=["*"],  # Разрешённые домены
     allow_credentials=True,
     allow_methods=["GET"],  # Разрешённые методы
     allow_headers=["*"],  # Разрешённые заголовки
@@ -82,4 +81,5 @@ async def get_random_hero_with_build():
     }
 
 if __name__ == "__main__":
-    uvicorn.run("api:app", reload=True)
+    port = int(os.getenv("PORT", 8000))  # Используем PORT из окружения Render
+    uvicorn.run("api:app", host="0.0.0.0", port=port, reload=False)  # reload=False для продакшена
