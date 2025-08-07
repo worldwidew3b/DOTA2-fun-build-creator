@@ -105,10 +105,10 @@
             clearError();
             clearContent();
             try {
-                const response = await axios.get("http://localhost:8000/get_hero");
+                const response = await axios.get("https://dota2-fun-build-creator.onrender.com/get_hero");
                 console.log("Hero response:", response.data);
                 heroName.textContent = response.data.hero;
-                heroImage.src = `http://localhost:8000${response.data.url}`;
+                heroImage.src = `https://dota2-fun-build-creator.onrender.com${response.data.url}`;
                 heroImage.onerror = () => {
                     console.error("Hero image failed to load:", response.data.url);
                     heroImage.src = "https://via.placeholder.com/384x192?text=Image+Not+Found";
@@ -129,10 +129,10 @@
             clearError();
             clearContent();
             try {
-                const response = await axios.get("http://localhost:8000/get_hero_with_build");
+                const response = await axios.get("https://dota2-fun-build-creator.onrender.com/get_hero_with_build");
                 console.log("Build response:", response.data);
                 heroName.textContent = response.data.hero;
-                heroImage.src = `http://localhost:8000${response.data.url}`;
+                heroImage.src = `https://dota2-fun-build-creator.onrender.com${response.data.url}`;
                 heroImage.onerror = () => {
                     console.error("Hero image failed to load:", response.data.url);
                     heroImage.src = "https://via.placeholder.com/384x192?text=Image+Not+Found";
@@ -141,7 +141,7 @@
                 heroContainer.classList.add("fade-in");
                 itemsGrid.innerHTML = response.data.build.map((item, index) => `
                     <div class="item-card bg-gray-800 rounded-lg p-4 text-center shadow-lg">
-                        <img src="http://localhost:8000${item.item_url}" alt="${item.item_title}" class="w-24 h-24 object-cover rounded mx-auto mb-2" onerror="this.src='https://via.placeholder.com/96x96?text=Item+Not+Found'; console.error('Item image failed to load:', '${item.item_url}');">
+                        <img src="https://dota2-fun-build-creator.onrender.com${item.item_url}" alt="${item.item_title}" class="w-24 h-24 object-cover rounded mx-auto mb-2" onerror="this.src='https://via.placeholder.com/96x96?text=Item+Not+Found'; console.error('Item image failed to load:', '${item.item_url}');">
                         <p class="text-sm capitalize text-gray-200">${item.item_title}</p>
                     </div>
                 `).join("");
