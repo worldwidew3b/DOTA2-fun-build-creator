@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор героев и билдов Dota 2</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.7/dist/axios.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #1a202c, #2d3748);
+        }
+        .hero-card, .item-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hero-card:hover, .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        .btn {
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white flex flex-col items-center p-6">
+    <div class="max-w-4xl w-full">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
+            Генератор героев и билдов Dota 2
+        </h1>
+        <div class="flex justify-center space-x-6 mb-8">
+            <button id="get-hero" class="btn px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-lg font-semibold shadow-lg disabled:bg-blue-400">
+                Случайный герой
+            </button>
+            <button id="get-build" class="btn px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg text-lg font-semibold shadow-lg disabled:bg-green-400">
+                Герой с билдом
+            </button>
+        </div>
+        <div id="loading" class="hidden text-center text-yellow-300 text-lg mb-6">Загрузка...</div>
+        <div id="error" class="hidden text-center text-red-500 text-lg mb-6"></div>
+        <div id="hero-container" class="hidden text-center mb-8">
+            <div class="hero-card bg-gray-800 rounded-xl p-6 mx-auto max-w-md shadow-lg">
+                <h2 id="hero-name" class="text-3xl font-bold mb-4 capitalize text-blue-300"></h2>
+                <img id="hero-image" src="" alt="Герой" class="w-full h-48 object-cover rounded-lg">
+            </div>
+        </div>
+        <div id="build-container" class="hidden">
+            <h3 class="text-2xl font-semibold text-center mb-6 text-green-300">Билд</h3>
+            <div id="items-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-6"></div>
+        </div>
+    </div>
+    <script>
+        console.log("Script loaded. Axios:", typeof axios);
+
+        const getHeroBtn = document.getElementById("get-hero");
+        const getBuildBtn = document.getElementById("get-build");
+        const loading = document.getElementById("loading");
+        const errorDiv = document.getElementById("error");
+        const heroContainer = document.getElementById("hero-container");
+        const heroName = document.getElementById("hero-name");
+        const heroImage = document.getElementById("hero-image");
+        const buildContainer = document.getElementById("build-container");
+        const itemsGrid = document.getElementById("items-grid");
+
+        function showLoading() {
+            loading.classList.remove("hidden");
+            getHeroBtn.disabled = true;
+            getBuildBtn.disabled = true;
+        }
+
+        function hideLoading() {
+            loading.classList.add("hidden");
+            getHeroBtn.disabled = false;
+            getBuildBtn.disabled = false;
+        }
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.classList.remove("hidden");
+        }
+
+        function clearError() {
+            errorDiv.textContent = "";
+            errorDiv.classList.add("hidden");
+        }
+
+        function clearContent() {
+            heroContainer.classList.add("hidden");
+            buildContainer.classList.add("hidden");
+            itemsGrid.innerHTML = "";
+        }
+
+        getHeroBtn.addEventListener("click", async () => {
+            console.log("Fetching hero...");
+            showLoading();
+            clearError();
+            clearContent();
+            try {
+                const response = await axios.get("http://localhost:8000/get_hero");
+                console.log("Hero response:", response.data);
+                heroName.textContent = response.data.hero;
+                heroImage.src = `http://localhost:8000${response.data.url}`;
+                heroImage.onerror = () => {
+                    console.error("Hero image failed to load:", response.data.url);
+                    heroImage.src = "https://via.placeholder.com/384x192?text=Image+Not+Found";
+                };
+                heroContainer.classList.remove("hidden");
+                heroContainer.classList.add("fade-in");
+                setTimeout(() => heroContainer.classList.remove("fade-in"), 500);
+            } catch (err) {
+                console.error("Fetch hero error:", err);
+                showError("Не удалось загрузить героя: " + err.message);
+            }
+            hideLoading();
+        });
+
+        getBuildBtn.addEventListener("click", async () => {
+            console.log("Fetching hero with build...");
+            showLoading();
+            clearError();
+            clearContent();
+            try {
+                const response = await axios.get("http://localhost:8000/get_hero_with_build");
+                console.log("Build response:", response.data);
+                heroName.textContent = response.data.hero;
+                heroImage.src = `http://localhost:8000${response.data.url}`;
+                heroImage.onerror = () => {
+                    console.error("Hero image failed to load:", response.data.url);
+                    heroImage.src = "https://via.placeholder.com/384x192?text=Image+Not+Found";
+                };
+                heroContainer.classList.remove("hidden");
+                heroContainer.classList.add("fade-in");
+                itemsGrid.innerHTML = response.data.build.map((item, index) => `
+                    <div class="item-card bg-gray-800 rounded-lg p-4 text-center shadow-lg">
+                        <img src="http://localhost:8000${item.item_url}" alt="${item.item_title}" class="w-24 h-24 object-cover rounded mx-auto mb-2" onerror="this.src='https://via.placeholder.com/96x96?text=Item+Not+Found'; console.error('Item image failed to load:', '${item.item_url}');">
+                        <p class="text-sm capitalize text-gray-200">${item.item_title}</p>
+                    </div>
+                `).join("");
+                buildContainer.classList.remove("hidden");
+                buildContainer.classList.add("fade-in");
+                setTimeout(() => {
+                    heroContainer.classList.remove("fade-in");
+                    buildContainer.classList.remove("fade-in");
+                }, 500);
+            } catch (err) {
+                console.error("Fetch build error:", err);
+                showError("Не удалось загрузить героя с билдом: " + err.message);
+            }
+            hideLoading();
+        });
+
+        console.log("App initialized");
+    </script>
+</body>
+</html>
